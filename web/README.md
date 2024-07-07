@@ -17,7 +17,7 @@
 
     **Или использование Docker Hub:**
     ```sh
-    docker pull betmyex/rustore_chatbot-web:0.1
+    docker pull betmyex/rustore_chatbot-web:1.1
     ```
 
 3. **Сборка и развертывание контейнера**
@@ -33,7 +33,7 @@
     docker run -d \
         --name flask_app \
         -p 5000:5000 \
-        betmyex/rustore_chatbot-web:0.1
+        betmyex/rustore_chatbot-web:1.1
     ```
 
 4. **Проверка работы**
