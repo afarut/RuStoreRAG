@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Чат{% endblock %}
+{% block content %}
+<div id="deleteConfirmationModal" class="modal">
+    <div class="modal-content">
+        <p>Вы уверены, что хотите удалить чат?</p>
+        <div class="modal-buttons">
+            <button id="cancelButton">Отмена</button>
+            <button id="confirmButton">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<div class="chat">
+    <div id="chat-box">
+        <div id="messages"></div>
+        <div id="input-box">
+            <input type="text" id="message-input" placeholder="Ваш вопрос">
+            <button id="send-button" class="telegram-send-button" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path fill="none" d="M0 0h24v24H0z"></path>
+                    <path d="M2 21l4-4h14c1.1 0 2-0.9 2-2V5c0-1.1-0.9-2-2-2H6c-1.1 0-2 0.9-2 2v14zM6 9l6 5 4-4"></path>
+                </svg>
+            </button>
+            <button id="clear-button" class="clear-chat-button" onclick="openDeleteConfirmationModal()">
+                <i class="fas fa-trash-alt"></i>
+        </div>
+        
+        <script>
+            document.getElementById('send-button').addEventListener('click', sendMessage);
+            document.getElementById('message-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        
+            function clearChat() {
+                const messagesContainer = document.getElementById('messages');
+                messagesContainer.innerHTML = '';
+                sessionStorage.removeItem('userMessages');
+                sessionStorage.removeItem('botMessages');
+            }
+        </script>
+    </div>
+</div>
+{% endblock %}

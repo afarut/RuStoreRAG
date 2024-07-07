@@ -1,0 +1,11 @@
+Flask
+Flask-Bcrypt
+Flask-SQLAlchemy
+Flask-WTF
+email-validator
+flask-script
+flask-migrate
+flask-login
+psycopg2
+python-dotenv
+requests
