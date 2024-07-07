@@ -1,0 +1,11 @@
+FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
+
+ENV DEBIAN_FRONTEND noninteractive
+
+COPY ./req.txt ./req.txt
+
+RUN pip install -r req.txt
+
+COPY . .
+
+CMD ["python", "-u", "main.py"]
