@@ -15,7 +15,7 @@ def chat():
     bear = get_iam_token()["iamToken"]
 
     headers = {
-        'x-node-id': 'bt1nrcqlo7781a84n0l6',
+        'x-node-id': 'bt1ko9aviighgr5uadpf',
         'Authorization': f'Bearer {bear}',
         'x-folder-id': 'b1gvmo70ll74cvokevfk',
     }
