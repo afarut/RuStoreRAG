@@ -1,0 +1,117 @@
+from bs4 import BeautifulSoup
+from requests import Session
+import pandas as pd
+from time import sleep
+import pickle
+from markdownify import markdownify as md
+
+
+def get_soup(session, url):
+    headers = {"Host": "www.rustore.ru",
+               "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
+               "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0",
+               "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+               "Accept-Encoding": "gzip, deflate, br, zstd",
+               "DNT": "1",
+               "Sec-GPC": "1",
+               "Connection": "keep-alive",
+               "Cookie": "_ga_3R5JQM4WFB=GS1.1.1720185507.1.1.1720185508.0.0.0; _ga=GA1.1.1832732227.1720185507",
+               "Upgrade-Insecure-Requests": "1",
+               "Sec-Fetch-Dest": "document",
+               "Sec-Fetch-Mode": "navigate",
+               "Sec-Fetch-Site": "none",
+               "Sec-Fetch-User": "?1",
+               "Priority": "u=0, i",
+               "TE": "trailers"}
+    #proxy = {"http": "http://51.178.142.1"}
+    req = session.get(url)
+    req.encoding = 'utf-8'
+    soup = BeautifulSoup(req.text, "html.parser")
+    with open("./1.html", "w", encoding="UTF-8") as f:
+        f.write(req.text)
+    return soup
+
+
+class RuStoreParser:
+    def __init__(self, ):
+        self.session = Session()
+        self.prefix_link = "https://www.rustore.ru"
+        self.was_parsed = set()
+        self.will_parse = set()
+        self.result_data = []#pd.DataFrame(data={"title": [],
+                             #                 "url": [],
+                             #                 "text": []})
+
+    def get_titles(self):
+        links  = set()
+        soup = get_soup(self.session, "https://www.rustore.ru/help")
+        for i in soup.find_all("a", class_="cardContainer_kDT1"):
+            links.add(self.prefix_link + i.attrs["href"])
+        return links
+
+    def get_page(self, url):
+        self.was_parsed.add(url)
+
+        soup = get_soup(self.session, url)
+        body = soup.find("div", "theme-doc-markdown")
+        if body is None:
+            body = soup.find("nav", "theme-doc-breadcrumbs").parent.find("header")
+        try:
+            #print(dir(body))
+            title = body.find("h1").text
+            text = body.get_text(separator=' ')
+            for tbody in body.find_all("tbody"):
+                for row in tbody.find_all("tr"):
+                    text = text.replace(row.get_text(separator=" "), "")
+                    text += row.get_text(separator=" ") + "\n"
+
+            data = {"title": title,
+                    "url": url,
+                    "text": f"{body}"}
+
+
+            self.result_data.append(data)
+
+            with open('html.pickle', 'wb') as handle:
+                pickle.dump(self.result_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            #print(md(f"{body}"))
+            #self.result_data.to_csv("./res1.csv", index=False, escapechar='\\')
+            self.get_page_links(soup)
+        except Exception as e:
+            print(url, e)
+
+    def get_page_links(self, soup):
+        side_bar = soup.find("ul", class_="theme-doc-sidebar-menu")
+        links = []
+        for i in soup.find_all("a", class_="menu__link"):
+            self.will_parse.add(self.prefix_link + i.attrs["href"])
+        self.will_parse -= self.was_parsed
+
+    def start(self):
+        self.will_parse = self.get_titles()
+        self.will_parse.add("https://www.rustore.ru/help/developers/monetization/monetization-report/")
+        while self.will_parse:
+            link = self.will_parse.pop()
+            self.get_page(link)
+            print(link, f"Осталось: {len(self.will_parse)}")
+            self.was_parsed.add(link)
+            sleep(5)
+#        self.result_data.to_csv("./res.csv", index=False, escapechar='\\')
+
+
+
+
+print(RuStoreParser().start())
+#print(RuStoreParser().get_page("https://www.rustore.ru/help/developers/monetization/monetization-report/"))
+
+
+
+
+
+
+
+
+
+
+
+
